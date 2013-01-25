@@ -5,14 +5,15 @@ from Acquisition import aq_inner
 
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 
-from plone.app.multilingual.browser.selector import LanguageSelectorViewlet
-from plone.app.i18n.locales.browser.selector import LanguageSelector
+from plone.app.multilingual.browser.vocabularies import translated_urls
 
 from plone.multilingualbehavior.interfaces import ILanguageIndependentField
 
 from zope.component import getUtility
 from plone.registry.interfaces import IRegistry
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
+
+from plone.app.i18n.locales.interfaces import ISelectorAdapter
 
 
 class MultilingualEditForm(DefaultEditForm):
@@ -28,15 +29,10 @@ class MultilingualEditForm(DefaultEditForm):
         """ Deprecated """
         context = aq_inner(self.context)
 
-        ls = LanguageSelector(context, self.request, None, None)
-        ls.update()
+        ls = ISelectorAdapter(context, self.request)
         results = ls.languages()
 
-        supported_langs = [v['code'] for v in results]
-        missing = set([str(c) for c in supported_langs])
-
-        lsv = LanguageSelectorViewlet(context, self.request, None, None)
-        translations = lsv._translations(missing)
+        translations = translated_urls(context)
 
         # We want to see the babel_view
         append_path = ('', 'babel_view',)
@@ -49,12 +45,9 @@ class MultilingualEditForm(DefaultEditForm):
             appendtourl = '/'.join(append_path)
 
             if data['translated']:
-                trans, direct, has_view_permission = translations[code]
-                if not has_view_permission:
-                    # shortcut if the user cannot see the item
-                    non_viewable.add((data['code']))
-                    continue
-                data['url'] = trans.absolute_url() + appendtourl
+                # XXX we should check if it has permission
+                trans = translations[code]
+                data['url'] = trans + appendtourl
             else:
                 non_viewable.add((data['code']))
 

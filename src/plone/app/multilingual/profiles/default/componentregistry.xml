@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<componentregistry>
+  <adapters>
+  <adapter
+    for="plone.multilingual.interfaces.ITranslatable"
+    provides="plone.app.i18n.locales.interfaces.ISelectorAdapter"
+    factory="plone.app.multilingual.browser.selector.LanguageSelectorPAM"
+    />
+  </adapters>
+</componentregistry>

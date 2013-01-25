@@ -2,7 +2,11 @@ from ZTUtils import make_query
 from zope.component import queryAdapter
 from plone.multilingual.interfaces import ITG
 from plone.multilingual.interfaces import NOTG
-from plone.app.i18n.locales.browser.selector import LanguageSelector
+from plone.app.i18n.locales.browser.selector import SelectorAdapter
+from zope.app.component.hooks import getSite
+from zope.interface import implements
+from plone.app.i18n.locales.interfaces import ISelectorAdapter
+
 
 
 def addQuery(request, url, exclude=tuple(), **extras):
@@ -64,34 +68,28 @@ def getPostPath(context, request):
 NOT_TRANSLATED_YET_TEMPLATE = '/not_translated_yet'
 
 
-class LanguageSelectorViewlet(LanguageSelector):
+class LanguageSelectorPAM(SelectorAdapter):
     """Language selector for translatable content.
     """
 
-    def languages(self):
-        languages_info = super(LanguageSelectorViewlet, self).languages()
-        results = []
-        translation_group = queryAdapter(self.context, ITG)
-        if translation_group is None:
-            translation_group = NOTG
-        for lang_info in languages_info:
-            # Avoid to modify the original language dict
-            data = lang_info.copy()
-            data['translated'] = True
-            query_extras = {
-                'set_language': data['code'],
-            }
-            post_path = getPostPath(self.context, self.request)
-            if post_path:
-                query_extras['post_path'] = post_path
-            data['url'] = addQuery(
-                self.request,
-                self.context.absolute_url().rstrip("/") + \
-                    "/@@multilingual-selector/%s/%s" % (
-                        translation_group,
-                        lang_info['code']
-                    ),
-                **query_extras
-            )
-            results.append(data)
-        return results
+    implements(ISelectorAdapter)
+
+    def __init__(self, context):
+        super(LanguageSelectorPAM, self).__init__(context)
+        self.translation_group = queryAdapter(context, ITG)
+        if self.translation_group is None:
+            self.translation_group = NOTG
+
+    def setRequest(self, request):
+        super(LanguageSelectorPAM, self).setRequest(request)
+        self.query_extras = {}
+        post_path = getPostPath(self.context, request)
+        if post_path:
+            self.query_extras['post_path'] = self.post_path
+
+    def getTGUrl(self):
+        portal_url = getSite().absolute_url()
+        return portal_url + '/@@multilingual-selector/' + self.translation_group
+
+    def urlForLanguage(self, code):
+        return addQuery(self.request, self.getTGUrl() + '/' + code, **self.query_extras)

@@ -13,8 +13,7 @@ from Products.CMFCore.interfaces._content import IFolderish
 from plone.app.folder.utils import findObjects
 from plone.multilingual.interfaces import ITranslationManager
 from plone.multilingual.interfaces import ITranslationLocator, ILanguage
-from plone.app.multilingual.browser.selector import LanguageSelectorViewlet
-from plone.app.i18n.locales.browser.selector import LanguageSelector
+from plone.app.i18n.locales.browser.selector import ISelectorAdapter
 
 from plone.registry.interfaces import IRegistry
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
@@ -53,9 +52,7 @@ class BabelUtils(BrowserView):
         """ Deprecated """
         context = aq_inner(self.context)
 
-        ls = LanguageSelector(context, self.request, None, None)
-        ls.update()
-        results = ls.languages()
+        results = ISelectorAdapter(context, self.request).languages()
 
         supported_langs = [v['code'] for v in results]
         missing = set([str(c) for c in supported_langs])
