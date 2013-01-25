@@ -1,7 +1,7 @@
 from zope.interface import Interface
 from zope.interface import implementsOnly
 from zope.schema import Choice
-from zope.schema import Bool, List
+from zope.schema import Bool
 from Products.statusmessages.interfaces import IStatusMessage
 from zope.component import getMultiAdapter
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
@@ -16,6 +16,7 @@ from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
 
 from plone.app.controlpanel.language import LanguageControlPanel as BasePanel
 from plone.app.controlpanel.language import LanguageControlPanelAdapter
+from plone.app.controlpanel.language import ILanguageSelectionSchema
 from plone.app.multilingual.browser.setup import SetupMultilingualSite
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
 from plone.protect import CheckAuthenticator
@@ -31,45 +32,11 @@ from plone.app.uuid.utils import uuidToObject
 import json
 
 from plone.app.multilingual import isLPinstalled
-from plone.multilingual.interfaces import ITranslationManager, ILanguage
+from plone.multilingual.interfaces import ILanguage
 
 from Products.CMFPlone import PloneMessageFactory as _Plone
 from zope.i18nmessageid import MessageFactory
 _ = MessageFactory('plone.app.multilingual')
-
-
-class IMultiLanguageSelectionSchema(Interface):
-    """ Interface for language selection - control panel fieldset
-    """
-
-    default_language = Choice(
-        title=_(u"heading_site_language",
-                default=u"Default site language"),
-        description=_(u"description_site_language",
-                      default=u"The default language used for the content "
-                              u"and the UI of this site."),
-        required=True,
-        vocabulary=("plone.app.multilingual.vocabularies."
-                    "AllContentLanguageVocabulary"))
-
-    available_languages = List(
-        title=_(u"heading_available_languages",
-                default=u"Available languages"),
-        description=_(u"description_available_languages",
-                default=u"The languages in which the site should be "
-                        u"translatable."),
-        required=True,
-        missing_value=set(),
-        value_type=Choice(
-            vocabulary=("plone.app.multilingual.vocabularies."
-                        "AllContentLanguageVocabulary")))
-
-    # show_original_on_translation = Bool(
-    #     title=_(u"heading_show_original_on_translation",
-    #             default=u"Show original on translation"),
-    #     description=_(u"description_show_original_on_translation",
-    #             default=u"Show the left column on translation"),
-    #     )
 
 
 class IInitialCleanSiteSetupAdapter(Interface):
@@ -98,87 +65,6 @@ class IInitialCleanSiteSetupAdapter(Interface):
         required=False,
         )
 
-
-class IMultiLanguageOptionsSchema(Interface):
-    """ Interface for language options - control panel fieldset
-    """
-
-    use_content_negotiation = Bool(
-        title=_(u"heading_language_of_the_content",
-                default=u"Use the language of the content item."),
-        description=_(u"description_language_of_the_content",
-                default=u"Use the language of the content item."),
-        required=False,
-        )
-
-    use_path_negotiation = Bool(
-        title=_(
-            u"heading_language_codes_in_URL",
-            default=u"Use language codes in URL path for manual override."),
-        description=_(
-            u"description_language_codes_in_URL",
-            default=u"Use language codes in URL path for manual override."),
-        required=False,
-        )
-
-    use_cookie_negotiation = Bool(
-        title=_(u"heading_cookie_manual_override",
-                default=(u"Use cookie for manual override. (Required for "
-                         u"the language selector viewlet to be rendered.)")),
-        description=_(
-            u"description_cookie_manual_override",
-            default=(u"Use cookie for manual override. (Required for the "
-                     u"language selector viewlet to be rendered.)")),
-        required=False,
-        )
-
-    authenticated_users_only = Bool(
-        title=_(u"heading_auth_cookie_manual_override",
-                default=u"Authenticated users only."),
-        description=_(
-            u"description_auth_ookie_manual_override",
-            default=(u"Authenticated users only. Use cookie for manual "
-                     u"override. (Required for the language selector viewlet "
-                     u"to be rendered.)")),
-        required=False,
-        )
-
-    set_cookie_everywhere = Bool(
-        title=_(
-            u"heading_set_language_cookie_always",
-            default=(u"Set the language cookie always, i.e. also when the "
-                     u"'set_language' request parameter is absent.")),
-        description=_(
-            u"description_set_language_cookie_always",
-            default=(u"Set the language cookie always, i.e. also when the "
-                     u"'set_language' request parameter is absent.")),
-        required=False,
-        )
-
-    use_subdomain_negotiation = Bool(
-        title=_(u"heading_use_subdomain",
-                default=u"Use subdomain (e.g.: de.plone.org)."),
-        description=_(u"description_use_subdomain",
-                default=u"Use subdomain (e.g.: de.plone.org)."),
-        required=False,
-        )
-
-    use_cctld_negotiation = Bool(
-        title=_(u"heading_top_level_domain",
-                default=u"Use top-level domain (e.g.: www.plone.de)."),
-        description=_(u"description_top_level_domain",
-                default=u"Use top-level domain (e.g.: www.plone.de)."),
-        required=False,
-        )
-
-    use_request_negotiation = Bool(
-        title=_(u"heading_browser_language_request_negotiation",
-                default=u"Use browser language request negotiation."),
-        description=_(u"description_browser_language_request_negotiation",
-                default=u"Use browser language request negotiation."),
-        required=False,
-        )
-
 selector_policies = SimpleVocabulary(
     [SimpleTerm(value=u'closest', title=_(u'Search for closest translation in parent\'s content chain.')),
      SimpleTerm(value=u'dialog', title=_(u'Show user dialog with information about the available translations.'))
@@ -200,95 +86,6 @@ class IMultiLanguagePolicies(Interface):
         required=True,
         vocabulary=selector_policies
     )
-
-
-class MultiLanguageOptionsControlPanelAdapter(LanguageControlPanelAdapter):
-    implementsOnly(IMultiLanguageOptionsSchema)
-
-    def __init__(self, context):
-        super(MultiLanguageOptionsControlPanelAdapter, self).__init__(context)
-
-    def get_use_content_negotiation(self):
-        return self.context.use_content_negotiation
-
-    def set_use_content_negotiation(self, value):
-        self.context.use_content_negotiation = value
-
-    def get_use_path_negotiation(self):
-        return self.context.use_path_negotiation
-
-    def set_use_path_negotiation(self, value):
-        self.context.use_path_negotiation = value
-
-    def get_use_cookie_negotiation(self):
-        return self.context.use_cookie_negotiation
-
-    def set_use_cookie_negotiation(self, value):
-        self.context.use_cookie_negotiation = value
-
-    def get_authenticated_users_only(self):
-        return self.context.authenticated_users_only
-
-    def set_authenticated_users_only(self, value):
-        self.context.authenticated_users_only = value
-
-    def get_set_cookie_everywhere(self):
-        return self.context.set_cookie_everywhere
-
-    def set_set_cookie_everywhere(self, value):
-        self.context.set_cookie_everywhere = value
-
-    def get_use_subdomain_negotiation(self):
-        return self.context.use_subdomain_negotiation
-
-    def set_use_subdomain_negotiation(self, value):
-        self.context.use_subdomain_negotiation = value
-
-    def get_use_cctld_negotiation(self):
-        return self.context.use_cctld_negotiation
-
-    def set_use_cctld_negotiation(self, value):
-        self.context.use_cctld_negotiation = value
-
-    def get_use_request_negotiation(self):
-        return self.context.use_request_negotiation
-
-    def set_use_request_negotiation(self, value):
-        self.context.use_request_negotiation = value
-
-    use_content_negotiation = property(get_use_content_negotiation,
-                                       set_use_content_negotiation)
-    use_path_negotiation = property(get_use_path_negotiation,
-                                    set_use_path_negotiation)
-    use_cookie_negotiation = property(get_use_cookie_negotiation,
-                                      set_use_cookie_negotiation)
-    authenticated_users_only = property(get_authenticated_users_only,
-                                        set_authenticated_users_only)
-    set_cookie_everywhere = property(get_set_cookie_everywhere,
-                                     set_set_cookie_everywhere)
-    use_subdomain_negotiation = property(get_use_subdomain_negotiation,
-                                         set_use_subdomain_negotiation)
-    use_cctld_negotiation = property(get_use_cctld_negotiation,
-                                     set_use_cctld_negotiation)
-    use_request_negotiation = property(get_use_request_negotiation,
-                                       set_use_request_negotiation)
-
-
-class MultiLanguageControlPanelAdapter(LanguageControlPanelAdapter):
-    implementsOnly(IMultiLanguageSelectionSchema)
-
-    def __init__(self, context):
-        super(MultiLanguageControlPanelAdapter, self).__init__(context)
-
-    def get_available_languages(self):
-        return [unicode(l) for l in self.context.getSupportedLanguages()]
-
-    def set_available_languages(self, value):
-        languages = [str(l) for l in value]
-        self.context.supported_langs = languages
-
-    available_languages = property(get_available_languages,
-                                   set_available_languages)
 
 
 class MultiLanguageExtraOptionsAdapter(LanguageControlPanelAdapter):
@@ -370,11 +167,8 @@ class MultiLanguagePoliciesAdapter(LanguageControlPanelAdapter):
     selector_lookup_translations_policy = property(get_selector_lookup_translations_policy,
                                                    set_selector_lookup_translations_policy)
 
-selection = FormFieldsets(IMultiLanguageSelectionSchema)
+selection = FormFieldsets(ILanguageSelectionSchema)
 selection.label = _(u'Site languages')
-
-options = FormFieldsets(IMultiLanguageOptionsSchema)
-options.label = _(u'Negotiation scheme')
 
 extras = FormFieldsets(IMultiLanguageExtraOptionsSchema)
 extras.label = _(u'Extra options')
@@ -407,7 +201,7 @@ class LanguageControlPanel(BasePanel):
 
     template = ViewPageTemplateFile('templates/controlpanel.pt')
 
-    form_fields = FormFieldsets(selection, options, policies, extras, clean_site_setup)
+    form_fields = FormFieldsets(selection, policies, extras, clean_site_setup)
 
     label = _("Multilingual Settings")
     description = _("All the configuration of P.A.M. If you want to set "

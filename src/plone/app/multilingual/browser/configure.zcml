@@ -104,8 +104,6 @@
     />
 
 
-  <adapter factory=".controlpanel.MultiLanguageControlPanelAdapter" />
-  <adapter factory=".controlpanel.MultiLanguageOptionsControlPanelAdapter" />
   <adapter factory=".controlpanel.MultiLanguageExtraOptionsAdapter" />
   <adapter factory=".controlpanel.MultiLanguagePoliciesAdapter" />
   <adapter factory=".controlpanel.InitialCleanSiteSetupAdapter" />
