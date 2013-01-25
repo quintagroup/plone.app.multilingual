@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <registry>
  <records interface="plone.app.multilingual.interfaces.IMultiLanguageExtraOptionsSchema">
-    <value key="filter_content">True</value>
     <value key="google_translation_key"></value>
  </records>
  <records interface="plone.app.multilingual.browser.controlpanel.IMultiLanguagePolicies">

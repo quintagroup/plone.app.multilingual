@@ -13,17 +13,6 @@ class IMultiLanguageExtraOptionsSchema(Interface):
     """ Interface for language extra options - control panel fieldset
     """
 
-    filter_content = schema.Bool(
-        title=_(
-            u"heading_filter_content",
-            default=u"Filter content by language."),
-        description=_(
-            u"description_filter_content",
-            default=u"Filter using language the content on folder_contents"),
-        default=True,
-        required=False,
-        )
-
     redirect_babel_view = schema.Bool(
         title=_(
             u"heading_redirect_babel_view",
