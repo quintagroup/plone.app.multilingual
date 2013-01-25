@@ -85,7 +85,7 @@ class LanguageSelectorPAM(SelectorAdapter):
         self.query_extras = {}
         post_path = getPostPath(self.context, request)
         if post_path:
-            self.query_extras['post_path'] = self.post_path
+            self.query_extras['post_path'] = post_path
 
     def getTGUrl(self):
         portal_url = getSite().absolute_url()

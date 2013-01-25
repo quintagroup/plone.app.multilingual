@@ -76,32 +76,11 @@ def I18nAwareCatalog():
     CatalogTool.manage_catalogView = DTMLFile('www/catalogView', globals())
 
 
-def I18nAwareFolderContents():
-
-    if AlreadyApplied('I18nAwareFolderContents'):
-        return
-
-    def contents_table(self):
-        try:
-            settings = getUtility(IRegistry).forInterface(
-                IMultiLanguageExtraOptionsSchema)
-        except KeyError:
-            table = FolderContentsTable(aq_inner(self.context), self.request)
-            return table.render()
-        if settings.filter_content:
-            table = FolderContentsTable(aq_inner(self.context), self.request)
-        else:
-            table = FolderContentsTable(aq_inner(self.context), self.request,
-                                        contentFilter={'Language': 'all'})
-        return table.render()
-
-    FolderContentsView.__pam_old_contents_table = \
-        FolderContentsView.contents_table
-    FolderContentsView.contents_table = contents_table
-
 try:
+    # Check if there is a patch applied by LinguaPlone
     from Products.LinguaPlone import patches
 except ImportError:
-    I18nAwareCatalog()
+    pass
+    # We try to not apply catalog patch
+    # I18nAwareCatalog()
 
-I18nAwareFolderContents()
