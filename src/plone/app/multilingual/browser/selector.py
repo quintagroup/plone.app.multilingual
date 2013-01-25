@@ -3,7 +3,7 @@ from zope.component import queryAdapter
 from plone.multilingual.interfaces import ITG
 from plone.multilingual.interfaces import NOTG
 from plone.app.i18n.locales.browser.selector import SelectorAdapter
-from zope.app.component.hooks import getSite
+from zope.component.hooks import getSite
 from zope.interface import implements
 from plone.app.i18n.locales.interfaces import ISelectorAdapter
 
