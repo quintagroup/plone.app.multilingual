@@ -1,6 +1,5 @@
 from logging import getLogger
 from plone.app.layout.navigation.interfaces import INavigationRoot
-from plone.app.multilingual.interfaces import SHARED_NAME
 from plone.app.multilingual import isDexterityInstalled
 from plone.multilingual.interfaces import ITranslationManager
 from plone.multilingual.interfaces import ILanguage
@@ -28,7 +27,7 @@ class SetupView(BrowserView):
 class SetupMultilingualSite(object):
 
     # portal_type that is added as root language folder:
-    folder_type = 'Folder'
+    folder_type = 'LRF'
 
     def __init__(self, context=None):
         self.previousDefaultPageId = None
@@ -60,7 +59,6 @@ class SetupMultilingualSite(object):
         doneSomething += self.removePortalDefaultPage()
         if self.previousDefaultPageId:
             doneSomething += self.resetDefaultPage()
-        doneSomething += self.setupSharedFolder()
         doneSomething += self.setupLanguageSwitcher()
         if not doneSomething:
             return "Nothing done."
@@ -140,8 +138,18 @@ class SetupMultilingualSite(object):
         folder = getattr(self.context, folderId, None)
         wftool = getToolByName(self.context, 'portal_workflow')
         if folder is None:
-            self.context.invokeFactory(self.folder_type, folderId)
-            folder = getattr(self.context, folderId)
+            _createObjectByType(self.folder_type,
+                    self.context,
+                    folderId)
+            # portal_types = getToolByName(folder, "portal_types")
+
+            # # Get this content type definition from content types registry
+            # type_info = portal_types.getTypeInfo(self.folder_type)
+
+            # # _constructInstance takes optional *args, **kw parameters too
+            # folder = type_info._constructInstance(self.context, folderId)
+
+            folder = self.context[folderId]
             ILanguage(folder).set_language(code)
             folder.setTitle(name)
             state = wftool.getInfoFor(folder, 'review_state', None)
@@ -159,38 +167,6 @@ class SetupMultilingualSite(object):
             alsoProvides(folder, INavigationRoot)
             doneSomething = True
             LOG.info("INavigationRoot setup on folder '%s'" % code)
-        return doneSomething
-
-    def setupSharedFolder(self):
-        """
-        Create the shared neutral language folder
-        """
-        doneSomething = False
-        folderId = SHARED_NAME
-        folder = getattr(self.context, folderId, None)
-        wftool = getToolByName(self.context, 'portal_workflow')
-        if folder is None:
-            # bypass all settings that don't allow creating
-            # content in the Plone root
-            _createObjectByType(self.folder_type,
-                                self.context,
-                                folderId)
-            #self.context.invokeFactory(self.folder_type, folderId)
-            folder = getattr(self.context, folderId)
-            ILanguage(folder).set_language(LANGUAGE_INDEPENDENT)
-            folder.setTitle("Language Shared")
-            state = wftool.getInfoFor(folder, 'review_state', None)
-            # This assumes a direct 'publish' transition from the initial state
-            available_transitions = [t['id'] for t in wftool.getTransitionsFor(folder)]
-            if state != 'published' and 'publish' in available_transitions:
-                wftool.doActionFor(folder, 'publish')
-            folder.reindexObject()
-            doneSomething = True
-            LOG.info("Added LANGUAGE_INDEPENDENT folder: %s" % (folderId))
-        if not INavigationRoot.providedBy(folder):
-            alsoProvides(folder, INavigationRoot)
-            doneSomething = True
-            LOG.info("INavigationRoot setup on shared folder ")
         return doneSomething
 
     def removePortalDefaultPage(self):

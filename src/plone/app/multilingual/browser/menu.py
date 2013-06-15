@@ -15,7 +15,6 @@ from plone.app.multilingual.browser.vocabularies import (
     untranslated_languages, translated_languages, translated_urls)
 from plone.app.multilingual import _
 from plone.multilingual.interfaces import LANGUAGE_INDEPENDENT, ITranslationManager, ILanguage
-from plone.app.multilingual.interfaces import SHARED_NAME
 from plone.app.multilingual.interfaces import IPloneAppMultilingualInstalled
 
 from plone.registry.interfaces import IRegistry
@@ -191,7 +190,7 @@ class TranslateMenu(BrowserMenu):
                 "description": _(
                     u"description_shared_folder",
                     default=u"Show the language shared (neutral language) folder"),
-                "action": portal_url + '/' + SHARED_NAME,
+                "action": portal_url + '/folder_contents',
                 "selected": False,
                 "icon": None,
                 "extra": {"id": "_shared_folder",

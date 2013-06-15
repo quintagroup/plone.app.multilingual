@@ -2,7 +2,10 @@ from zope.interface import Interface
 from zope import schema
 from plone.app.multilingual import _
 
-SHARED_NAME = 'shared'
+
+class ILanguageRootFolder(Interface):
+    """ Language Root Folder content type interface
+    """
 
 
 class IPloneAppMultilingualInstalled(Interface):
@@ -13,13 +16,13 @@ class IMultiLanguageExtraOptionsSchema(Interface):
     """ Interface for language extra options - control panel fieldset
     """
 
-    filter_content = schema.Bool(
+    show_neutral = schema.Bool(
         title=_(
             u"heading_filter_content",
-            default=u"Filter content by language."),
+            default=u"Show neutral content on LRF."),
         description=_(
             u"description_filter_content",
-            default=u"Filter using language the content on folder_contents"),
+            default=u"Patch the catalog to add the shared content on the LRF"),
         default=True,
         required=False,
         )

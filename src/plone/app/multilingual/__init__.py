@@ -24,6 +24,3 @@ except pkg_resources.DistributionNotFound:
     isDexterityInstalled = False
 else:
     isDexterityInstalled = True
-
-from plone.app.multilingual import catalog
-catalog  # pyflakes
