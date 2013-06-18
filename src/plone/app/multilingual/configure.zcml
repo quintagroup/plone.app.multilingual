@@ -53,10 +53,20 @@
     <depends name="catalog"/>
   </genericsetup:importStep>
 
+  <genericsetup:upgradeStep
+      source="1"
+      destination="2"
+      title="New configuration registry options"
+      description=""
+      profile="plone.app.multilingual:default"
+      handler=".upgrades.upgrade_1_to_2"
+      />
+
+
   <utility factory="plone.app.multilingual.profile.HiddenProfiles"
            name="plone.app.multilingual.hiddenprofiles" />
-           
+
   <utility factory="plone.app.multilingual.profile.HiddenProducts"
            name="plone.app.multilingual.hiddenproducts" />
-    
+
 </configure>
