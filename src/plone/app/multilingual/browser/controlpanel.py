@@ -189,6 +189,12 @@ selector_policies = SimpleVocabulary(
     ]
 )
 
+factory_policies = SimpleVocabulary(
+    [SimpleTerm(value=u'default', title=_(u'Default factory: create items with invokeFactory')),
+     SimpleTerm(value=u'unrestricted', title=_(u'Unrestricted factory: create items with _createObjectByType'))
+    ]
+)
+
 
 class IMultiLanguagePolicies(Interface):
     """ Interface for language policies - control panel fieldset
@@ -204,6 +210,14 @@ class IMultiLanguagePolicies(Interface):
         required=True,
         vocabulary=selector_policies
     )
+
+    translation_factory = Choice(
+        title=_(u"heading_selector_translation_factory",
+                default=u"The translation factory used to create new translations "),
+        required=True,
+        default='default',
+        vocabulary=factory_policies,
+        )
 
 
 class MultiLanguageOptionsControlPanelAdapter(LanguageControlPanelAdapter):
@@ -391,8 +405,19 @@ class MultiLanguagePoliciesAdapter(LanguageControlPanelAdapter):
     def set_selector_lookup_translations_policy(self, value):
         self.settings.selector_lookup_translations_policy = value
 
+    def get_selector_translation_factory(self):
+        return self.settings.translation_factory
+
+    def set_selector_translation_factory(self, value):
+        self.settings.translation_factory = value
+
     selector_lookup_translations_policy = property(get_selector_lookup_translations_policy,
                                                    set_selector_lookup_translations_policy)
+
+
+    translation_factory = property(get_selector_translation_factory,
+                                   set_selector_translation_factory)
+
 
 selection = FormFieldsets(IMultiLanguageSelectionSchema)
 selection.label = _(u'Site languages')
