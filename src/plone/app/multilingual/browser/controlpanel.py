@@ -492,7 +492,6 @@ class LanguageControlPanel(BasePanel):
         return ''
 
     def _set_translation_factory(self, translation_factory):
-        import pdb; pdb.set_trace()
         components = getSiteManager()
         from plone.multilingual.factory import DefaultTranslationFactory
         from plone.multilingual.factory import UnrestrictedTranslationFactory
