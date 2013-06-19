@@ -24,6 +24,7 @@ from plone.protect import CheckAuthenticator
 
 from zope.component import getUtility
 from zope.component.interfaces import ComponentLookupError
+from zope.component.hooks import getSiteManager
 from plone.registry.interfaces import IRegistry
 from Products.CMFCore.utils import getToolByName
 
@@ -476,6 +477,7 @@ class LanguageControlPanel(BasePanel):
             self.status = _Plone("No changes made.")
         setupTool = SetupMultilingualSite()
         output = setupTool.setupSite(self.context)
+        self._set_translation_factory(data.get('translation_factory'))
         self.status += output
 
     @form.action(_Plone(u'label_cancel', default=u'Cancel'),
@@ -488,6 +490,36 @@ class LanguageControlPanel(BasePanel):
                               name='absolute_url')()
         self.request.response.redirect(url + '/plone_control_panel')
         return ''
+
+    def _set_translation_factory(self, translation_factory):
+        import pdb; pdb.set_trace()
+        components = getSiteManager()
+        from plone.multilingual.factory import DefaultTranslationFactory
+        from plone.multilingual.factory import UnrestrictedTranslationFactory
+        from plone.multilingual.interfaces import ITranslatable
+        from plone.multilingual.interfaces import ITranslationFactory
+        if translation_factory == u'default':
+            components.unregisterAdapter(
+                factory=UnrestrictedTranslationFactory,
+                required=(ITranslatable,),
+                provided=ITranslationFactory
+                )
+            components.registerAdapter(
+                factory=DefaultTranslationFactory,
+                required=(ITranslatable,),
+                provided=ITranslationFactory
+                )
+        else:
+            components.unregisterAdapter(
+                factory=DefaultTranslationFactory,
+                required=(ITranslatable,),
+                provided=ITranslationFactory
+                )
+            components.registerAdapter(
+                factory=UnrestrictedTranslationFactory,
+                required=(ITranslatable,),
+                provided=ITranslationFactory
+                )
 
     isLPinstalled = isLPinstalled
 
