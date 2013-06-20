@@ -76,33 +76,6 @@ class IMultiLanguageSelectionSchema(Interface):
     #     )
 
 
-class IInitialCleanSiteSetupAdapter(Interface):
-
-    set_default_language = Bool(
-        title=_(u"heading_set_default_language",
-                default=u"Set the default language"),
-        description=_(
-            u"description_set_default_language",
-            default=(u"Set the default language on all content without "
-                     u"language defined. This value is not stored so you need "
-                     u"to check every time you want to run it")),
-        default=False,
-        required=False,
-    )
-
-    move_content_to_language_folder = Bool(
-        title=_(u"heading_move_content_to_language_folder",
-                default=u"Move root content to default language folder"),
-        description=_(
-            u"description_move_content_to_language_folder",
-            default=(u"Move the content that is on the root folder to the "
-                     u"default language folder. This value is not stored so "
-                     u"you need to check every time you want to run it")),
-        default=False,
-        required=False,
-    )
-
-
 class IMultiLanguageOptionsSchema(Interface):
     """ Interface for language options - control panel fieldset
     """
@@ -352,30 +325,6 @@ class MultiLanguageExtraOptionsAdapter(LanguageControlPanelAdapter):
     )
 
 
-class InitialCleanSiteSetupAdapter(LanguageControlPanelAdapter):
-    implementsOnly(IInitialCleanSiteSetupAdapter)
-
-    def get_set_default_language(self):
-        return False
-
-    def set_set_default_language(self, value):
-        if value:
-            SetupMultilingualSite(self.context).set_default_language_content()
-
-    def get_move_content_to_language_folder(self):
-        return False
-
-    def set_move_content_to_language_folder(self, value):
-        if value:
-            SetupMultilingualSite(self.context).move_default_language_content()
-
-    set_default_language = property(get_set_default_language,
-                                    set_set_default_language)
-
-    move_content_to_language_folder = property(
-        get_move_content_to_language_folder,
-        set_move_content_to_language_folder)
-
 
 class MultiLanguagePoliciesAdapter(LanguageControlPanelAdapter):
     implementsOnly(IMultiLanguagePolicies)
@@ -406,24 +355,6 @@ extras.label = _(u'Extra options')
 policies = FormFieldsets(IMultiLanguagePolicies)
 policies.label = _(u'Policies')
 
-clean_site_setup = FormFieldsets(IInitialCleanSiteSetupAdapter)
-clean_site_setup.label = _(u'Clean site setup')
-clean_site_setup.description = _(u"""If you are installing PAM for the first """
-                                  """time in a Plone site, either if it's on an """
-                                  """existing or a brand new one you should run the """
-                                  """following procedures in order to move the """
-                                  """default site content to its right root """
-                                  """language folder and be sure that all the """
-                                  """content have the language attribute set up """
-                                  """correctly. Previous to run them, please be """
-                                  """sure that you have set up your site's """
-                                  """languages in the 'Site languages' tab and have """
-                                  """saved that setting. Finally, in case you have """
-                                  """an existing Plone site with """
-                                  """Products.LinguaPlone installed, please do not """
-                                  """run this steps and refer directly to the """
-                                  """'Migration' tab.""")
-
 
 class LanguageControlPanel(BasePanel):
     """A modified language control panel, allows selecting multiple languages.
@@ -431,7 +362,7 @@ class LanguageControlPanel(BasePanel):
 
     template = ViewPageTemplateFile('templates/controlpanel.pt')
 
-    form_fields = FormFieldsets(selection, options, policies, extras, clean_site_setup)
+    form_fields = FormFieldsets(selection, options, policies, extras)
 
     label = _("Multilingual Settings")
     description = _("All the configuration of P.A.M. If you want to set "

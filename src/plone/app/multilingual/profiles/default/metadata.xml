@@ -6,5 +6,6 @@
     <dependency>profile-plone.formwidget.contenttree:default</dependency>
     <dependency>profile-plone.multilingual:default</dependency>
     <dependency>profile-archetypes.multilingual:default</dependency>
+    <dependency>profile-plone.app.dexterity:default</dependency>
   </dependencies>
 </metadata>

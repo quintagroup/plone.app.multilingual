@@ -14,10 +14,11 @@ from plone.app.multilingual.browser.interfaces import (
 from plone.app.multilingual.browser.vocabularies import (
     untranslated_languages, translated_languages, translated_urls)
 from plone.app.multilingual import _
-from plone.multilingual.interfaces import LANGUAGE_INDEPENDENT, ITranslationManager, ILanguage
+from plone.multilingual.interfaces import LANGUAGE_INDEPENDENT, ITranslationManager, ILanguage, ITranslatable
 from plone.app.multilingual.interfaces import IPloneAppMultilingualInstalled
 
 from plone.registry.interfaces import IRegistry
+from zope.site.hooks import getSite
 from zope.component import getUtility
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
 
@@ -58,99 +59,99 @@ class TranslateMenu(BrowserMenu):
             if isDefaultPage(prt, context):
                 contexts.append(prt)
 
-            for idx,context in enumerate(contexts):
-                url = context.absolute_url()
-                
-                langs = untranslated_languages(context)
-                for lang in langs:
-                    lang_name = lang.title
-                    lang_id = lang.value
-                    icon = showflags and lt.getFlagForLanguageCode(lang_id) or None
+            for idx,obj in enumerate(contexts):
+                url = obj.absolute_url()
+                if ITranslatable.providedBy(obj):
+                    langs = untranslated_languages(obj)
+                    for lang in langs:
+                        lang_name = lang.title
+                        lang_id = lang.value
+                        icon = showflags and lt.getFlagForLanguageCode(lang_id) or None
+                        item = {
+                            "description": _(u"description_translate_into",
+                                            default=u"Translate into ${lang_name}",
+                                            mapping={"lang_name": lang_name}),
+                            "action": url + "/@@create_translation?language=%s" % lang_id,
+                            "selected": False,
+                            "icon": icon,
+                            "width": "14",
+                            "height": "11",
+                            "extra": {"id": "translate_into_%s" % lang_id,
+                                      "separator": None,
+                                      "class": "contentmenuflags"},
+                                      "submenu": None,
+                            }
+                        item['title'] = idx and _(u'create_translation_folder',
+                                        default=u"Create ${lang_name} folder",
+                                        mapping={"lang_name": lang_name}) \
+                                or _(u'create_translation',
+                                            default=u"Create ${lang_name}",
+                                            mapping={"lang_name": lang_name})
+                        menu.append(item)
+
+                    langs = translated_languages(obj)
+                    urls = translated_urls(obj)
+                    for lang in langs:
+                        if lang not in urls:
+                            # omit if translation is not permitted to access.
+                            continue
+                        lang_name = lang.title
+                        lang_id = lang.value
+                        icon = showflags and lt.getFlagForLanguageCode(lang_id) or None
+                        item = {
+                            "description": _(u"description_babeledit_menu",
+                                            default=u"Babel edit ${lang_name}",
+                                            mapping={"lang_name": lang_name}),
+                            "action": urls.getTerm(lang_id).title + "/" + edit_view,
+                            "selected": False,
+                            "icon": icon,
+                            "width": "14",
+                            "height": "11",
+                            "extra": {"id": "babel_edit_%s" % lang_id,
+                                      "separator": None,
+                                      "class": "contentmenuflags"},
+                                      "submenu": None,
+                            }
+                        item['title'] = idx and _(u'edit_translation_folder',
+                                        default=u"Edit ${lang_name} folder",
+                                        mapping={"lang_name": lang_name}) \
+                                or _(u'edit_translation',
+                                                    default=u"Edit ${lang_name}",
+                                                    mapping={"lang_name": lang_name})
+                        menu.append(item)
+
                     item = {
-                        "description": _(u"description_translate_into",
-                                        default=u"Translate into ${lang_name}",
-                                        mapping={"lang_name": lang_name}),
-                        "action": url + "/@@create_translation?language=%s" % lang_id,
+                        "description": _(u"description_add_translations",
+                                        default=u"Add existing content as translation"),
+                        "action": url + "/add_translations",
                         "selected": False,
-                        "icon": icon,
-                        "width": "14",
-                        "height": "11",
-                        "extra": {"id": "translate_into_%s" % lang_id,
-                                  "separator": None,
-                                  "class": "contentmenuflags"},
-                                  "submenu": None,
+                        "icon": None,
+                        "extra": {"id": "_add_translations",
+                               "separator": langs and "actionSeparator" or None,
+                               "class": ""},
+                        "submenu": None,
                         }
-                    item['title'] = idx and _(u'create_translation_folder',
-                                    default=u"Create ${lang_name} folder",
-                                    mapping={"lang_name": lang_name}) \
-                            or _(u'create_translation',
-                                        default=u"Create ${lang_name}",
-                                        mapping={"lang_name": lang_name})
+                    item['title'] = idx and _(u"title_add_translations_folder",
+                                        default=u"Add translations for folder...") \
+                            or _(u"title_add_translations",
+                                                            default=u"Add translations...")
                     menu.append(item)
 
-                langs = translated_languages(context)
-                urls = translated_urls(context)
-                for lang in langs:
-                    if lang not in urls:
-                        # omit if translation is not permitted to access.
-                        continue
-                    lang_name = lang.title
-                    lang_id = lang.value
-                    icon = showflags and lt.getFlagForLanguageCode(lang_id) or None
                     item = {
-                        "description": _(u"description_babeledit_menu",
-                                        default=u"Babel edit ${lang_name}",
-                                        mapping={"lang_name": lang_name}),
-                        "action": urls.getTerm(lang_id).title + "/" + edit_view,
+                        "title": _(u"title_remove_translations",
+                                   default=u"Remove translations..."),
+                        "description": _(
+                            u"description_remove_translations",
+                            default=u"Delete translations or remove the relations"),
+                        "action": url + "/remove_translations",
                         "selected": False,
-                        "icon": icon,
-                        "width": "14",
-                        "height": "11",
-                        "extra": {"id": "babel_edit_%s" % lang_id,
-                                  "separator": None,
-                                  "class": "contentmenuflags"},
-                                  "submenu": None,
+                        "icon": None,
+                        "extra": {"id": "_remove_translations",
+                               "separator": langs and "actionSeparator" or None,
+                               "class": ""},
+                        "submenu": None,
                         }
-                    item['title'] = idx and _(u'edit_translation_folder',
-                                    default=u"Edit ${lang_name} folder",
-                                    mapping={"lang_name": lang_name}) \
-                            or _(u'edit_translation',
-                                                default=u"Edit ${lang_name}",
-                                                mapping={"lang_name": lang_name})
                     menu.append(item)
-
-                item = {
-                    "description": _(u"description_add_translations",
-                                    default=u"Add existing content as translation"),
-                    "action": url + "/add_translations",
-                    "selected": False,
-                    "icon": None,
-                    "extra": {"id": "_add_translations",
-                           "separator": langs and "actionSeparator" or None,
-                           "class": ""},
-                    "submenu": None,
-                    }
-                item['title'] = idx and _(u"title_add_translations_folder",
-                                    default=u"Add translations for folder...") \
-                        or _(u"title_add_translations",
-                                                        default=u"Add translations...")
-                menu.append(item)
-
-                item = {
-                    "title": _(u"title_remove_translations",
-                               default=u"Remove translations..."),
-                    "description": _(
-                        u"description_remove_translations",
-                        default=u"Delete translations or remove the relations"),
-                    "action": url + "/remove_translations",
-                    "selected": False,
-                    "icon": None,
-                    "extra": {"id": "_remove_translations",
-                           "separator": langs and "actionSeparator" or None,
-                           "class": ""},
-                    "submenu": None,
-                    }
-                menu.append(item)
 
         elif LANGUAGE_INDEPENDENT == ILanguage(context).get_language():
             menu.append({
@@ -159,7 +160,7 @@ class TranslateMenu(BrowserMenu):
                 "description": _(
                     u"description_language_folder",
                     default=u"Go to the user's browser preferred language related folder"),
-                "action": portal_url + '/' + lt.getPreferredLanguage(),
+                "action": getSite().absolute_url() + '/' + lt.getPreferredLanguage(),
                 "selected": False,
                 "icon": None,
                 "extra": {"id": "_shared_folder",
@@ -175,7 +176,7 @@ class TranslateMenu(BrowserMenu):
                 "description": _(
                     u"description_universal_link",
                     default=u"Universal Language content link"),
-                "action": portal_url + "/@@multilingual-universal-link/" + context_id,
+                "action": getSite().absolute_url() + "/@@multilingual-universal-link/" + context_id,
                 "selected": False,
                 "icon": None,
                 "extra": {"id": "_universal_link",
@@ -190,7 +191,7 @@ class TranslateMenu(BrowserMenu):
                 "description": _(
                     u"description_shared_folder",
                     default=u"Show the language shared (neutral language) folder"),
-                "action": portal_url + '/folder_contents',
+                "action": getSite().absolute_url() + '/folder_contents',
                 "selected": False,
                 "icon": None,
                 "extra": {"id": "_shared_folder",
@@ -233,6 +234,9 @@ class TranslateSubMenuItem(BrowserSubMenuItem):
     @memoize
     def available(self):
         if not IPloneAppMultilingualInstalled.providedBy(self.request):
+            return False
+
+        if not ITranslatable.providedBy(self.context):
             return False
 
         lt = getToolByName(self.context, 'portal_languages', None)

@@ -3,12 +3,17 @@ from plone.app.layout.navigation.interfaces import INavigationRoot
 from plone.app.multilingual import isDexterityInstalled
 from plone.multilingual.interfaces import ITranslationManager
 from plone.multilingual.interfaces import ILanguage
+from plone.multilingual.interfaces import ITranslatable
 from plone.multilingual.interfaces import LANGUAGE_INDEPENDENT
+from plone.multilingual.subscriber import set_recursive_language
 from zope.interface import alsoProvides
 from Acquisition import aq_inner
 from Products.CMFPlone.utils import _createObjectByType
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
+from zope.component.hooks import getSite
+from plone.i18n.locales.languages import _languagelist
+from plone.i18n.locales.languages import _combinedlanguagelist
 
 LOG = getLogger('plone.app.multilingual')
 
@@ -60,6 +65,7 @@ class SetupMultilingualSite(object):
         if self.previousDefaultPageId:
             doneSomething += self.resetDefaultPage()
         doneSomething += self.setupLanguageSwitcher()
+        self.set_default_language_content()
         if not doneSomething:
             return "Nothing done."
         else:
@@ -87,24 +93,15 @@ class SetupMultilingualSite(object):
 
     def set_default_language_content(self):
         """
-        Set default language on content without language
+        Set default language on root to language independent
         """
-        context = aq_inner(self.context)
-        pc = getToolByName(context, "portal_catalog")
-        pl = getToolByName(context, "portal_languages")
-        pu = getToolByName(context, "portal_url")
-        portal = pu.getPortalObject()
-        path = '/'.join(portal.getPhysicalPath())
-        defaultLanguage = pl.getDefaultLanguage()
-        objects = pc.searchResults(path=path, Language='all')
-        for brain in objects:
-            obj = brain.getObject()
-            if ILanguage(obj).get_language() == '' and obj.id != SHARED_NAME:
-                ILanguage(obj).set_language(defaultLanguage)
-                obj.reindexObject(idxs=["Language"])
-                LOG.info("Set language %s on object %s" % (
-                    defaultLanguage, '/'.join(obj.getPhysicalPath())))
-        pc.manage_reindexIndex(ids=['Language', ])
+        portal = getSite()
+        defaultLanguage = LANGUAGE_INDEPENDENT
+        for id in portal.objectIds():
+            if id not in _languagelist and \
+               id not in _combinedlanguagelist and \
+               ITranslatable.providedBy(portal[id]):
+                set_recursive_language(portal[id], defaultLanguage)
 
     def move_default_language_content(self):
         """ Move the content with default language on the root folder
