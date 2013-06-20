@@ -34,6 +34,8 @@
 
     <include package=".browser" />
 
+    <adapter factory=".content.lrf.LRFOrdering" />
+
     <genericsetup:registerProfile
         name="default"
         title="plone.app.multilingual"

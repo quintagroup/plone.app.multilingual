@@ -304,11 +304,11 @@ class MultiLanguageExtraOptionsAdapter(LanguageControlPanelAdapter):
         self.settings = self.registry.forInterface(
             IMultiLanguageExtraOptionsSchema, check=False)
 
-    def get_filter_content(self):
-        return self.settings.filter_content
+    def get_show_neutral(self):
+        return self.settings.show_neutral
 
-    def set_filter_content(self, value):
-        self.settings.filter_content = value
+    def set_show_neutral(self, value):
+        self.settings.show_neutral = value
 
     def get_google_translation_key(self):
         return self.settings.google_translation_key
@@ -340,8 +340,8 @@ class MultiLanguageExtraOptionsAdapter(LanguageControlPanelAdapter):
     google_translation_key = property(get_google_translation_key,
                               set_google_translation_key)
 
-    filter_content = property(get_filter_content,
-                              set_filter_content)
+    show_neutral = property(get_show_neutral,
+                              set_show_neutral)
 
     redirect_babel_view = property(get_redirect_babel_view,
                                    set_redirect_babel_view)
