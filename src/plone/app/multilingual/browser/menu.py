@@ -169,36 +169,35 @@ class TranslateMenu(BrowserMenu):
                 "submenu": None,
                 })
 
-        if LANGUAGE_INDEPENDENT != ILanguage(context).get_language():
-            menu.append({
-                "title": _(u"universal_link",
-                       default=u"Universal Link"),
-                "description": _(
-                    u"description_universal_link",
-                    default=u"Universal Language content link"),
-                "action": getSite().absolute_url() + "/@@multilingual-universal-link/" + context_id,
-                "selected": False,
-                "icon": None,
-                "extra": {"id": "_universal_link",
-                       "separator": None,
-                       "class": ""},
-                "submenu": None,
-                })
+        menu.append({
+            "title": _(u"universal_link",
+                   default=u"Universal Link"),
+            "description": _(
+                u"description_universal_link",
+                default=u"Universal Language content link"),
+            "action": getSite().absolute_url() + "/@@multilingual-universal-link/" + context_id,
+            "selected": False,
+            "icon": None,
+            "extra": {"id": "_universal_link",
+                   "separator": None,
+                   "class": ""},
+            "submenu": None,
+            })
 
-            menu.append({
-                "title": _(u"shared_folder",
-                       default=u"Go to shared folder"),
-                "description": _(
-                    u"description_shared_folder",
-                    default=u"Show the language shared (neutral language) folder"),
-                "action": getSite().absolute_url() + '/folder_contents',
-                "selected": False,
-                "icon": None,
-                "extra": {"id": "_shared_folder",
-                       "separator": None,
-                       "class": ""},
-                "submenu": None,
-                })
+        menu.append({
+            "title": _(u"shared_folder",
+                   default=u"Go to shared folder"),
+            "description": _(
+                u"description_shared_folder",
+                default=u"Show the language shared (neutral language) folder"),
+            "action": getSite().absolute_url() + '/folder_contents',
+            "selected": False,
+            "icon": None,
+            "extra": {"id": "_shared_folder",
+                   "separator": None,
+                   "class": ""},
+            "submenu": None,
+            })
 
         menu.append({
             "title": _(u"title_set_language",

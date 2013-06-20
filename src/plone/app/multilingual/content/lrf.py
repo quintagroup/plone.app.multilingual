@@ -45,6 +45,13 @@ class LanguageRootFolder(Container):
 
     hasObject = has_key
 
+
+    def objectMap(self):
+        # Returns a tuple of mappings containing subobject meta-data.
+        return LazyMap(lambda (k, v):
+                       {'id': k, 'meta_type': getattr(v, 'meta_type', None)},
+                       self._tree.items(), self._count())
+
     def __contains__(self, name):
         return self.has_key(name)
 
@@ -64,16 +71,10 @@ class LanguageRootFolder(Container):
             else:
                 raise
 
-    def _checkId(self, id, allow_dup=0):
-        """ check only locally """
-        if not allow_dup and id in CMFOrderedBTreeFolderBase.objectIds(self, None, False):
-            raise BadRequestException('The id "%s" is invalid--'
-                                      'it is already in use.' % id)
-
     def _delOb(self, id):
         """ Remove the named object from the folder or parent. """
-        obj = CMFOrderedBTreeFolderBase._getOb(self, id, default)
-        if obj:
+        obj = CMFOrderedBTreeFolderBase._getOb(self, id, _marker)
+        if obj is not _marker:
             super(LanguageRootFolder, self)._delOb(id)
         else:
             aliased = getSite()
@@ -84,9 +85,8 @@ class LanguageRootFolder(Container):
         self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
 
     def _getOb(self, id, default=_marker):
-
         obj = CMFOrderedBTreeFolderBase._getOb(self, id, default)
-        if obj:
+        if obj is not default:
             return obj
         else:
             aliased = getSite()
@@ -106,29 +106,21 @@ class LanguageRootFolder(Container):
         try:
             if aliased is not None:
                 to_remove = []
-                aliased_objectIds = aliased.objectIds(spec)
+                aliased_objectIds = list(aliased.objectIds(spec))
                 for id in aliased_objectIds:
                     if id in _languagelist or id in _combinedlanguagelist:
                         to_remove.append(id)
-                        
+
                 for id in to_remove:
                     aliased_objectIds.remove(id)
             else:
-                aliased_objectIds = ()
+                aliased_objectIds = []
 
         except AttributeError:
-            aliased_objectIds = ()
+            aliased_objectIds = []
 
         own_elements = CMFOrderedBTreeFolderBase.objectIds(self, spec, False)
-
-        if len(own_elements) == 0 and aliased_objectIds:
-            return aliased_objectIds
-        else:
-            try:
-                return own_elements + aliased_objectIds
-            except TypeError:
-                return own_elements
-
+        return [item for item in own_elements] + aliased_objectIds
 
     def __getitem__(self, key):
         aliased = getSite()
@@ -171,4 +163,5 @@ class LRFOrdering(DefaultOrdering):
                 pos = self._pos()
                 return pos[id]
             else:
+                print "ERROR"
                 raise ValueError('No object with id "%s" exists.' % id)

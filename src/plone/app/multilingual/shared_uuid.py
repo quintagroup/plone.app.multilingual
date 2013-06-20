@@ -2,6 +2,7 @@ from Acquisition import aq_base, aq_chain
 
 from zope.interface import implementer
 from zope.component import adapter
+import uuid
 
 from plone.uuid.interfaces import IUUID, IAttributeUUID, ATTRIBUTE_NAME
 
@@ -17,7 +18,7 @@ def referenceableUUID(context):
     child = context
     for element in aq_chain(context):
         if hasattr(child, '_v_is_shared_content') and ILanguageRootFolder.providedBy(element):
-            return None
+            return getattr(aq_base(context), UUID_ATTR, None) + '-' + element.id
         child = element
     return getattr(aq_base(context), UUID_ATTR, None)
 
@@ -28,6 +29,6 @@ def attributeUUID(context):
     child = context
     for element in aq_chain(context):
         if hasattr(child, '_v_is_shared_content') and ILanguageRootFolder.providedBy(element):
-            return None
+            return getattr(context, ATTRIBUTE_NAME, None) + '-' + element.id
         child = element
     return getattr(context, ATTRIBUTE_NAME, None)

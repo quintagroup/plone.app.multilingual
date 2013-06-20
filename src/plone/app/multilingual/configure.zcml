@@ -37,8 +37,10 @@
     <adapter factory=".content.lrf.LRFOrdering" />
 
     <adapter
-      factory=".uuid.referenceableUUID" />
-
+      factory=".shared_uuid.referenceableUUID" />
+    <adapter
+      factory=".shared_uuid.attributeUUID" />
+      
     <genericsetup:registerProfile
         name="default"
         title="plone.app.multilingual"
