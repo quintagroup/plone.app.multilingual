@@ -45,6 +45,12 @@ class LanguageRootFolder(Container):
 
     hasObject = has_key
 
+    def _checkId(self, id, allow_dup=0):
+        """ check only locally """
+        if not allow_dup and id in CMFOrderedBTreeFolderBase.objectIds(self, None, False):
+            raise BadRequestException('The id "%s" is invalid--'
+                                      'it is already in use.' % id)
+
 
     def objectMap(self):
         # Returns a tuple of mappings containing subobject meta-data.
@@ -80,6 +86,7 @@ class LanguageRootFolder(Container):
             aliased = getSite()
             if aliased and id in aliased:
                 aliased._delOb(id)
+                # aliased.getOrdering().notifyRemoved(id)   # notify the ordering adapter
             else:
                 raise
         self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
@@ -93,8 +100,8 @@ class LanguageRootFolder(Container):
             if aliased:
                 obj = aliased._getOb(id, default)
                 if obj is default:
-                    if default is _marker:
-                        raise
+                    # if default is _marker:
+                    #     raise KeyError
                     return default
                 new_object = aq_base(obj).__of__(self)
                 new_object._v_is_shared_content = True

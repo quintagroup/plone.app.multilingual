@@ -23,6 +23,7 @@ from plone.app.i18n.locales.browser.selector import LanguageSelector
 from plone.registry.interfaces import IRegistry
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
 
+import uuid
 
 class BabelUtils(BrowserView):
 
@@ -150,18 +151,17 @@ def multilingualMoveObject(content, language):
         Also set the language on all the content moved
     """
     orig_lang = ILanguage(content).get_language()
-    orig_id = None
     if orig_lang == LANGUAGE_INDEPENDENT:
         orig_id = content.getId()
-        import pdb; pdb.set_trace()
     target_folder = ITranslationLocator(content)(language)
     parent = aq_parent(content)
     cb_copy_data = parent.manage_cutObjects(content.getId())
     list_ids = target_folder.manage_pasteObjects(cb_copy_data)
     new_id = list_ids[0]['new_id']
-    if orig_id and new_id != orig_id:
-        target_folder.manage_renameObject(new_id, orig_id)
-        new_object = target_folder[orig_id]
-    else:
-        new_object = target_folder[new_id]
+    # if orig_lang == LANGUAGE_INDEPENDENT and new_id != orig_id:
+    #     new_id = target_folder.manage_renameObject(new_id, orig_id)
+
+    new_object = target_folder[new_id]
+    if language != LANGUAGE_INDEPENDENT and hasattr(new_object, '_v_is_shared_content'):
+        del new_object._v_is_shared_content
     return new_object
