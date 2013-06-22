@@ -28,6 +28,7 @@
   <element value="plone.app.content.interfaces.INameFromTitle"/>
   <element value="Products.CMFPlone.interfaces.constrains.ISelectableConstrainTypes"/>
   <element value="plone.multilingualbehavior.interfaces.IDexterityTranslatable" />
+  <element value="plone.app.dexterity.behaviors.exclfromnav.IExcludeFromNavigation"/>
  </property>
  <property name="schema"></property>
  <property name="model_source"></property>

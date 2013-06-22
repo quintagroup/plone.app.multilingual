@@ -72,6 +72,11 @@ class LanguageRootFolder(Container):
                 # XXX Check that is content
 
                 new_object = aq_base(getattr(portal, name)).__of__(self)
+                #if IBaseObject.providedBy(new_object) or IDexterityContent.providedBy(new_object):
+                #    new_object._v_is_shared_content = True
+                #    return new_object
+                #else:
+                #    raise
                 new_object._v_is_shared_content = True
                 return new_object
             else:
@@ -113,6 +118,7 @@ class LanguageRootFolder(Container):
         try:
             if aliased is not None:
                 to_remove = []
+                # spec = ['Dexterity Container', 'Dexterity Item', 'ATFolder', 'ATDocument']
                 aliased_objectIds = list(aliased.objectIds(spec))
                 for id in aliased_objectIds:
                     if id in _languagelist or id in _combinedlanguagelist:
@@ -146,7 +152,6 @@ class LRFOrdering(DefaultOrdering):
 
     implements(IExplicitOrdering)
     adapts(ILanguageRootFolder)
-
 
     def idsInOrder(self):
         """ see interfaces.py """
