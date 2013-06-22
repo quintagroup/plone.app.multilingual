@@ -5,6 +5,7 @@ Variables  plone/app/multilingual/tests/robot/variables.py
 
 Library  Selenium2Library  timeout=${SELENIUM_TIMEOUT}  implicit_wait=${SELENIUM_IMPLICIT_WAIT}
 
+Library  Dialogs
 # Resource  library-settings.txt
 Resource  plone/app/multilingual/tests/robot/keywords.txt
 

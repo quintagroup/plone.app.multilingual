@@ -2,7 +2,9 @@
 from OFS.Folder import Folder
 from Testing import ZopeTestCase as ztc
 
-from plone.testing.z2 import ZSERVER_FIXTURE
+from plone.app.multilingual.tests.utils import setup_pam_site_fixture
+from plone.app.multilingual.tests.utils import setup_test_content
+
 from plone.app.testing import PLONE_FIXTURE
 from plone.app.testing import PloneSandboxLayer
 from plone.app.testing import applyProfile
@@ -10,11 +12,12 @@ from plone.app.testing import IntegrationTesting
 from plone.app.testing import FunctionalTesting
 from plone.app.testing import setRoles
 from plone.app.testing import TEST_USER_ID
+from plone.testing.z2 import ZSERVER_FIXTURE
+from zope.configuration import xmlconfig
 
 import plone.app.multilingual
+import plone.app.multilingual.tests
 import plone.app.dexterity
-
-from zope.configuration import xmlconfig
 
 import doctest
 import transaction
@@ -51,7 +54,21 @@ class PloneAppMultilingualLayer(PloneSandboxLayer):
         setRoles(portal, TEST_USER_ID, ['Manager'])
 
 
+class PloneAppMultilingualLayerRobot(PloneAppMultilingualLayer):
+    def setUpPloneSite(self, portal):
+        applyProfile(portal, 'plone.app.multilingual:default')
+        applyProfile(portal, 'plone.app.multilingual.tests:testing')
+        applyProfile(portal, 'plone.multilingualbehavior:default')
+        setRoles(portal, TEST_USER_ID, ['Manager'])
+        setup_pam_site_fixture(portal, ['ca', 'es'])
+        transaction.commit()
+
+        setup_test_content(portal)
+        transaction.commit()
+
+
 PLONEAPPMULTILINGUAL_FIXTURE = PloneAppMultilingualLayer()
+PLONEAPPMULTILINGUAL_ROBOT_FIXTURE = PloneAppMultilingualLayerRobot()
 
 PLONEAPPMULTILINGUAL_INTEGRATION_TESTING = IntegrationTesting(
     bases=(PLONEAPPMULTILINGUAL_FIXTURE,),
@@ -60,6 +77,6 @@ PLONEAPPMULTILINGUAL_FUNCTIONAL_TESTING = FunctionalTesting(
     bases=(PLONEAPPMULTILINGUAL_FIXTURE,),
     name="plone.app.multilingual:Functional")
 PLONEAPPMULTILINGUAL_ROBOT_TESTING = FunctionalTesting(
-    bases=(PLONEAPPMULTILINGUAL_FIXTURE, ZSERVER_FIXTURE),
+    bases=(PLONEAPPMULTILINGUAL_ROBOT_FIXTURE, ZSERVER_FIXTURE),
     name="plone.app.multilingual:Robot")
 optionflags = (doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE)
