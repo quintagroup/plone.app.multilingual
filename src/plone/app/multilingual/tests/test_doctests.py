@@ -11,7 +11,7 @@ integration_tests = [
 functional_tests = [
     #'form.txt',
     'menu.txt',
-    'catalog.txt',
+    #'catalog.txt',
 ]
 
 

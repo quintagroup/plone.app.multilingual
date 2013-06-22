@@ -5,7 +5,7 @@ Variables  plone/app/multilingual/tests/robot/variables.py
 
 Library  Selenium2Library  timeout=${SELENIUM_TIMEOUT}  implicit_wait=${SELENIUM_IMPLICIT_WAIT}
 
-Library  Dialogs
+# Library  Dialogs
 # Resource  library-settings.txt
 Resource  plone/app/multilingual/tests/robot/keywords.txt
 
@@ -13,6 +13,10 @@ Suite Setup  Suite Setup
 Suite Teardown  Suite Teardown
 
 *** Test Cases ***
+
+Scenario: The switcher is in place and working
+     When I go to  ${PLONE_URL}
+     Then I get the default (en) LRF
 
 Scenario: Babel View for DX content
     Given a site owner
@@ -26,7 +30,6 @@ Scenario: Babel View for AT content
      When I translate the content 'en/atdoc' to 'es'
       And I switch the available translations language to 'Catalan'
      Then I get the 'CA doc' as title of the available translation information for AT
-
 
 *** Keywords ***
 
@@ -47,3 +50,6 @@ I get the '${lang-title}' as title of the available translation information for 
 
 I get the '${lang-title}' as title of the available translation information for DX
     Wait Until Keyword Succeeds  5 sec  1 sec  Element Should Contain  id=form-widgets-IDublinCore-title  ${lang-title}
+
+I get the default (en) LRF
+    Page Should Contain  English
