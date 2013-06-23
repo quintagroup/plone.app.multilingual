@@ -58,7 +58,6 @@ class PloneAppMultilingualLayerRobot(PloneAppMultilingualLayer):
     def setUpPloneSite(self, portal):
         applyProfile(portal, 'plone.app.multilingual:default')
         applyProfile(portal, 'plone.app.multilingual.tests:testing')
-        applyProfile(portal, 'plone.multilingualbehavior:default')
         setRoles(portal, TEST_USER_ID, ['Manager'])
         setup_pam_site_fixture(portal, ['ca', 'es'])
         transaction.commit()

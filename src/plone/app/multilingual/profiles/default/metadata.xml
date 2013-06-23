@@ -7,5 +7,6 @@
     <dependency>profile-plone.multilingual:default</dependency>
     <dependency>profile-archetypes.multilingual:default</dependency>
     <dependency>profile-plone.app.dexterity:default</dependency>
+    <dependency>profile-plone.multilingualbehavior:default</dependency>
   </dependencies>
 </metadata>
