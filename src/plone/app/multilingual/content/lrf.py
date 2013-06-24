@@ -94,7 +94,8 @@ class LanguageRootFolder(Container):
                 # aliased.getOrdering().notifyRemoved(id)   # notify the ordering adapter
             else:
                 raise
-        self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
+        if id in self.getOrdering():
+            self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
 
     def _getOb(self, id, default=_marker):
         obj = CMFOrderedBTreeFolderBase._getOb(self, id, default)
