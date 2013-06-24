@@ -176,5 +176,5 @@ class LRFOrdering(DefaultOrdering):
                 pos = self._pos()
                 return pos[id]
             else:
-                print "ERROR"
-                raise ValueError('No object with id "%s" exists.' % id)
+                return 0
+                # raise ValueError('No object with id "%s" exists.' % id)

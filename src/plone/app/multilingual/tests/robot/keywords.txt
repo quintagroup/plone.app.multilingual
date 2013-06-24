@@ -4,6 +4,8 @@ Suite Setup
   # Suite
   # ----------------------------------------------------------------------------
   Open browser  ${PLONE_URL}  browser=${BROWSER}  remote_url=${REMOTE_URL}  desired_capabilities=${DESIRED_CAPABILITIES}
+  # Import library  Dialogs
+  # Pause execution
   # Log in as site owner
 
 Suite Teardown
@@ -37,6 +39,11 @@ Log in as test user
 Log out
   Go to  ${PLONE_URL}/logout
   Page should contain  logged out
+
+I go to
+    [Arguments]  ${location}
+    Go to  ${location}
+
   # ----------------------------------------------------------------------------
   # Content
   # ----------------------------------------------------------------------------
