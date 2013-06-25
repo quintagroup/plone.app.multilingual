@@ -92,7 +92,7 @@ class TranslateMenu(BrowserMenu):
                     langs = translated_languages(obj)
                     urls = translated_urls(obj)
                     for lang in langs:
-                        if lang not in urls:
+                        if lang.token not in [i.token for i in urls]:
                             # omit if translation is not permitted to access.
                             continue
                         lang_name = lang.title

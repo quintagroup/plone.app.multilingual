@@ -82,20 +82,20 @@ class LanguageRootFolder(Container):
             else:
                 raise
 
-    def _delOb(self, id):
-        """ Remove the named object from the folder or parent. """
-        obj = CMFOrderedBTreeFolderBase._getOb(self, id, _marker)
-        if obj is not _marker:
-            super(LanguageRootFolder, self)._delOb(id)
-        else:
-            aliased = getSite()
-            if aliased and id in aliased:
-                aliased._delOb(id)
-                # aliased.getOrdering().notifyRemoved(id)   # notify the ordering adapter
-            else:
-                raise
-        if id in self.getOrdering():
-            self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
+    # def _delOb(self, id):
+    #     """ Remove the named object from the folder or parent. """
+    #     obj = CMFOrderedBTreeFolderBase._getOb(self, id, _marker)
+    #     if obj is not _marker:
+    #         super(LanguageRootFolder, self)._delOb(id)
+    #     else:
+    #         aliased = getSite()
+    #         if aliased and id in aliased:
+    #             aliased._delOb(id)
+    #             # aliased.getOrdering().notifyRemoved(id)   # notify the ordering adapter
+    #         else:
+    #             raise
+    #     if id in self.getOrdering():
+    #         self.getOrdering().notifyRemoved(id)   # notify the ordering adapter
 
     def _getOb(self, id, default=_marker):
         obj = CMFOrderedBTreeFolderBase._getOb(self, id, default)

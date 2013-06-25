@@ -13,6 +13,12 @@ from plone.app.multilingual.content.lrf import ILanguageRootFolder
 
 
 @implementer(IUUID)
+@adapter(ILanguageRootFolder)
+def lrfUUID(context):
+    return getattr(aq_base(context), UUID_ATTR, None)
+
+
+@implementer(IUUID)
 @adapter(IArchetypesTranslatable)
 def referenceableUUID(context):
     child = context
