@@ -29,14 +29,13 @@ def referenceableUUID(context):
         child = element
     return getattr(aq_base(context), UUID_ATTR, None)
 
-
 @implementer(IUUID)
-@adapter(IDexterityTranslatable)
+@adapter(IAttributeUUID)
 def attributeUUID(context):
     child = context
     for element in aq_chain(context):
         if hasattr(child, '_v_is_shared_content') and ILanguageRootFolder.providedBy(element):
-            uid = getattr(aq_base(context), UUID_ATTR, None)
+            uid = getattr(aq_base(context), ATTRIBUTE_NAME, None)
             return uid + '-' + element.id if uid is not None else None
         child = element
     return getattr(context, ATTRIBUTE_NAME, None)

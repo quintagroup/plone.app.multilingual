@@ -38,8 +38,6 @@
 
     <adapter
       factory=".shared_uuid.referenceableUUID" />
-    <adapter
-      factory=".shared_uuid.attributeUUID" />
 
     <adapter
       factory=".shared_uuid.lrfUUID" />
