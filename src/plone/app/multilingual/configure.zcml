@@ -67,4 +67,9 @@
   <utility factory="plone.app.multilingual.profile.HiddenProducts"
            name="plone.app.multilingual.hiddenproducts" />
     
+  <subscriber for="
+      plone.dexterity.interfaces.IDexterityContent
+      zope.lifecycleevent.interfaces.IObjectAddedEvent"
+    handler=".subscriber.reindex_neutral" />
+
 </configure>
