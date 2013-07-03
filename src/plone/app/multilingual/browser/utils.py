@@ -164,4 +164,5 @@ def multilingualMoveObject(content, language):
     new_object = target_folder[new_id]
     if language != LANGUAGE_INDEPENDENT and hasattr(new_object, '_v_is_shared_content'):
         del new_object._v_is_shared_content
+        # XXX : we need to uncatalog old objects ???
     return new_object
