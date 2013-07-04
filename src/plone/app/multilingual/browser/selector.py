@@ -11,6 +11,8 @@ from plone.app.layout.navigation.root import getNavigationRoot
 from plone.app.multilingual.interfaces import ILanguageRootFolder
 from plone.app.multilingual import _
 
+from zope.component.hooks import getSite
+
 
 def addQuery(request, url, exclude=tuple(), **extras):
     """Adds the incoming GET query to the end of the url
@@ -82,8 +84,9 @@ class LanguageSelectorViewlet(LanguageSelector):
         if translation_group is None:
             translation_group = NOTG
 
-        lang = ILanguage(self.context).get_language()
-        if lang is LANGUAGE_INDEPENDENT and translation_group is NOTG:
+        if self.context != getSite() and
+           ILanguage(self.context).get_language() is LANGUAGE_INDEPENDENT and 
+           translation_group is NOTG:
             # We need have a new url for the translated lang 
             lrf = getNavigationRoot(self.context)
             obj_path = '/'.join(self.context.getPhysicalPath())
