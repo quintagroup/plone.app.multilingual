@@ -84,9 +84,7 @@ class LanguageSelectorViewlet(LanguageSelector):
         if translation_group is None:
             translation_group = NOTG
 
-        if self.context != getSite() and
-           ILanguage(self.context).get_language() is LANGUAGE_INDEPENDENT and 
-           translation_group is NOTG:
+        if self.context != getSite() and ILanguage(self.context).get_language() is LANGUAGE_INDEPENDENT and translation_group is NOTG:
             # We need have a new url for the translated lang 
             lrf = getNavigationRoot(self.context)
             obj_path = '/'.join(self.context.getPhysicalPath())
