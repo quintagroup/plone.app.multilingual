@@ -6,6 +6,7 @@ from zope.interface import alsoProvides
 from zope.interface import implements
 from zope.component import adapts
 from Products.CMFCore.utils import getToolByName
+from OFS.ObjectManager import BadRequestException
 
 from plone.folder.interfaces import IExplicitOrdering
 from zope.component.hooks import getSite
