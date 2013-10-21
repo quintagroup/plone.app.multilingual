@@ -180,6 +180,8 @@
         $('#trans-selector button').click(function () {
             var url = $(this).data('url');
             $('#frame-content').load(url, function () {
+                // We need to add here, in case is widgets we could't hook before
+                $(".autotoc-nav a").click(sync_elements_vertically);
                 $("#frame-content fieldset legend").unwrap().remove();
                 update_view();
             });
@@ -192,6 +194,8 @@
             var selected_elem = $(this).children('option').eq(this.selectedIndex);
             var url = selected_elem.val();
             $('#frame-content').load(url, function () {
+                // We need to add here, in case is widgets we could't hook before
+                $(".autotoc-nav a").click(sync_elements_vertically);
                 $("#frame-content fieldset legend").unwrap().remove();
                 update_view();
             });
@@ -220,12 +224,16 @@
         // Can be null if not buttons, but the drop-down is present
         if (initialFetch == null) {
             initialFetch = $('#trans-selector select option:selected').val();
+            // We need to add here, in case is widgets we could't hook before
+
         }
         $('#frame-content').load(initialFetch, function () {
+            $(".autotoc-nav a").click(sync_elements_vertically);
             $("#frame-content fieldset legend").unwrap().remove();
             update_view();
         });
 
         $(".formTabs").click(sync_elements_vertically);
+
     });
 }(jQuery));

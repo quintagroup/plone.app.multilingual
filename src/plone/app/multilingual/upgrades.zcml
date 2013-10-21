@@ -1,0 +1,14 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="plone.app.multilingual">
+
+    <genericsetup:upgradeStep
+        title="Migration for new LRF type"
+        description="Rename old language folders and copy content into new LRF. Migrate shared folder to portal root."
+        source="1"
+        destination="2"
+        handler="plone.app.multilingual.upgrades.migration_pam_1_to_2"
+        profile="plone.app.multilingual:default"/>
+
+</configure>

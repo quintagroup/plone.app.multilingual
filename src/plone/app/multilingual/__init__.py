@@ -1,6 +1,8 @@
 # make this a package
-
+import logging
 import pkg_resources
+
+logger = logging.getLogger('plone.app.multilingual')
 
 from zope.i18nmessageid import MessageFactory
 _ = MessageFactory('plone.app.multilingual')

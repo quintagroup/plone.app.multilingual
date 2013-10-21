@@ -16,6 +16,7 @@
     <includeDependencies package="." />
 
     <include file="permissions.zcml" />
+    <include file="upgrades.zcml" />
 
     <include package="plone.app.controlpanel" />
     <include package="Products.CMFCore" file="permissions.zcml" />
@@ -41,7 +42,7 @@
 
     <adapter
       factory=".shared_uuid.lrfUUID" />
-      
+
     <genericsetup:registerProfile
         name="default"
         title="plone.app.multilingual"
@@ -63,13 +64,20 @@
 
   <utility factory="plone.app.multilingual.profile.HiddenProfiles"
            name="plone.app.multilingual.hiddenprofiles" />
-           
+
   <utility factory="plone.app.multilingual.profile.HiddenProducts"
            name="plone.app.multilingual.hiddenproducts" />
-    
+
   <subscriber for="
       plone.dexterity.interfaces.IDexterityContent
       zope.lifecycleevent.interfaces.IObjectAddedEvent"
     handler=".subscriber.reindex_neutral" />
+
+
+  <subscriber
+      for="plone.dexterity.interfaces.IDexterityContent
+           zope.component.interfaces.IObjectEvent"
+      handler=".subscriber.remove_ghosts"
+      />
 
 </configure>
