@@ -84,63 +84,68 @@ class LanguageSelectorViewlet(LanguageSelector):
         if translation_group is None:
             translation_group = NOTG
 
-        if self.context != getSite() and ILanguage(self.context).get_language() is LANGUAGE_INDEPENDENT and translation_group is NOTG:
-            # We need have a new url for the translated lang 
-            lrf = getNavigationRoot(self.context)
-            obj_path = '/'.join(self.context.getPhysicalPath())
-            relative_path = obj_path.replace(lrf,'')
-            lrf_object = self.context.restrictedTraverse(lrf)
-            if ILanguageRootFolder.providedBy(lrf_object):
-                # It's a language root folder
-                urls = ITranslationManager(lrf_object).get_restricted_translations_url()
-                add_neutral = False
+        # todo lpmayos: afegeixo try per que no peti
+        try:
+            if self.context != getSite() and ILanguage(self.context).get_language() is LANGUAGE_INDEPENDENT and translation_group is NOTG:
+                # We need have a new url for the translated lang 
+                lrf = getNavigationRoot(self.context)
+                obj_path = '/'.join(self.context.getPhysicalPath())
+                relative_path = obj_path.replace(lrf,'')
+                lrf_object = self.context.restrictedTraverse(lrf)
+                if ILanguageRootFolder.providedBy(lrf_object):
+                    # It's a language root folder
+                    urls = ITranslationManager(lrf_object).get_restricted_translations_url()
+                    add_neutral = False
+                else:
+                    lrf_object = getattr(lrf_object, self.tool.getPreferredLanguage(), None)
+                    urls = ITranslationManager(lrf_object).get_restricted_translations_url()
+                    add_neutral = True
+                for lang_info in languages_info:
+                    # Avoid to modify the original language dict
+                    data = lang_info.copy()
+                    data['translated'] = True
+                    query_extras = {
+                        'set_language': data['code'],
+                    }
+                    post_path = getPostPath(self.context, self.request)
+                    if post_path:
+                        query_extras['post_path'] = post_path
+                    data['url'] = addQuery(
+                        self.request,
+                        urls[lang_info['code']] + relative_path,
+                        **query_extras
+                    )
+                    results.append(data)
+                if add_neutral:
+                    results.append({
+                        'url': self.context.absolute_url(),
+                        'code': 'neutral',
+                        'selected': True,
+                        'native': _('Neutral'),
+                        'flag': ''
+                    })
             else:
-                lrf_object = getattr(lrf_object, self.tool.getPreferredLanguage(), None)
-                urls = ITranslationManager(lrf_object).get_restricted_translations_url()
-                add_neutral = True
-            for lang_info in languages_info:
-                # Avoid to modify the original language dict
-                data = lang_info.copy()
-                data['translated'] = True
-                query_extras = {
-                    'set_language': data['code'],
-                }
-                post_path = getPostPath(self.context, self.request)
-                if post_path:
-                    query_extras['post_path'] = post_path
-                data['url'] = addQuery(
-                    self.request,
-                    urls[lang_info['code']] + relative_path,
-                    **query_extras
-                )
-                results.append(data)
-            if add_neutral:
-                results.append({
-                    'url': self.context.absolute_url(),
-                    'code': 'neutral',
-                    'selected': True,
-                    'native': _('Neutral'),
-                    'flag': ''
-                })
-        else:
-            for lang_info in languages_info:
-                # Avoid to modify the original language dict
-                data = lang_info.copy()
-                data['translated'] = True
-                query_extras = {
-                    'set_language': data['code'],
-                }
-                post_path = getPostPath(self.context, self.request)
-                if post_path:
-                    query_extras['post_path'] = post_path
-                data['url'] = addQuery(
-                    self.request,
-                    self.portal_url().rstrip("/") + \
-                        "/@@multilingual-selector/%s/%s" % (
-                            translation_group,
-                            lang_info['code']
-                        ),
-                    **query_extras
-                )
-                results.append(data)
+                for lang_info in languages_info:
+                    # Avoid to modify the original language dict
+                    data = lang_info.copy()
+                    data['translated'] = True
+                    query_extras = {
+                        'set_language': data['code'],
+                    }
+                    post_path = getPostPath(self.context, self.request)
+                    if post_path:
+                        query_extras['post_path'] = post_path
+                    data['url'] = addQuery(
+                        self.request,
+                        self.portal_url().rstrip("/") + \
+                            "/@@multilingual-selector/%s/%s" % (
+                                translation_group,
+                                lang_info['code']
+                            ),
+                        **query_extras
+                    )
+                    results.append(data)
+        except:
+            pass
+
         return results
