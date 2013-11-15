@@ -71,7 +71,7 @@ class LanguageRootFolder(Container):
             portal = getSite()
             if portal is not None and name in portal:
                 # XXX Check that is content
-                if name != 'portal_catalog' and name!='portal_url':
+                if name != 'portal_catalog':
                     new_object = aq_base(getattr(portal, name)).__of__(self)
                     new_object._v_is_shared_content = True
                     return new_object
