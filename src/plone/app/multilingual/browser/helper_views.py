@@ -19,6 +19,7 @@ from plone.registry.interfaces import IRegistry
 from plone.multilingual.interfaces import ITranslationManager
 from plone.multilingual.interfaces import ITranslatable
 from plone.multilingual.manager import TranslationManager
+from plone.app.multilingual.content.lrf import ILanguageRootFolder
 from plone.app.multilingual.browser.controlpanel import IMultiLanguagePolicies
 from .selector import addQuery
 from .selector import NOT_TRANSLATED_YET_TEMPLATE
@@ -123,7 +124,6 @@ class selector_view(universal_link):
 
         # As we don't have any content object we are going to look
         # for the best option
-
         root = getToolByName(self.context, 'portal_url')
         ltool = getToolByName(self.context, 'portal_languages')
 
@@ -147,7 +147,7 @@ class selector_view(universal_link):
         checkPermission = getSecurityManager().checkPermission
         chain = self.getParentChain(context)
         for item in chain:
-            if ISiteRoot.providedBy(item):
+            if ISiteRoot.providedBy(item) and not(ILanguageRootFolder.providedBy(item)):
                 # We do not care to get a permission error
                 # if the whole of the portal cannot be viewed.
                 # Having a permission issue on the root is fine;
