@@ -2,6 +2,8 @@ from Acquisition import aq_inner
 from Products.CMFCore.utils import getToolByName
 from Products.Five import BrowserView
 
+from plone.app.multilingual.browser.selector import addQuery
+
 
 class LanguageSwitcher(BrowserView):
 
@@ -27,4 +29,4 @@ class LanguageSwitcher(BrowserView):
         if not langCookie or langCookie != target:
             self.request.response.setCookie('I18N_LANGUAGE', target, path='/')
 
-        self.request.response.redirect(url, status=301)
+        self.request.response.redirect(addQuery(self.request, url), status=301)
