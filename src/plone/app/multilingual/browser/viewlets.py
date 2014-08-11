@@ -125,7 +125,7 @@ class AlternateLanguagesViewlet(ViewletBase):
         alternates = []
         for item in results:
             path_len = portal_path_len + len('{0:s}/'.format(item.Language))
-            url = item.getURL(relative=1)[path_len:]
+            url = item.getPath()[path_len:]
             alternates.append({
                 'lang': item.Language,
                 'url': url.strip('/'),
